@@ -1,11 +1,11 @@
 import os, hashlib
 
-def get_file_list(dir_path):
-    file_list = []
+def get_file_blocks_dict(dir_path, block_size):
+    file_dict = {}
     for item in os.walk(dir_path):
         if os.path.isfile(item):
-            file_list.add(item)
-    return file_list
+            file_dict[item] = get_blocks_hash(item, block_size)
+    return file_dict
 
 def get_blocks_hash(file_path, block_size):
     f = open(file_path)
