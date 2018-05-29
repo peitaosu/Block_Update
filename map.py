@@ -3,10 +3,14 @@ import os, hashlib, json
 class BlockMap():
     
     def __init__(self):
+        self.root_path = None
         self.dir_path = None
         self.block_size = 4 * 1024
         self.map = {}
     
+    def set_root_path(self, root_path):
+        self.root_path = root_path
+
     def set_dir_path(self, dir_path):
         self.dir_path = dir_path
     
@@ -24,10 +28,11 @@ class BlockMap():
         return hash_list
 
     def get_blocks_map(self):
-        for root, dirs, files in os.walk(self.dir_path):
+        for root, dirs, files in os.walk(os.path.join(self.root_path, self.dir_path)):
             for file_item in files:
-                file_path = os.path.join(root, file_item)
-                self.map[file_path] = self.get_blocks_hash(file_path, self.block_size)
+                file_real_path = os.path.join(root, file_item)
+                file_rel_path = file_real_path.lstrip(self.root_path)
+                self.map[file_rel_path] = self.get_blocks_hash(file_real_path, self.block_size)
         return self.map
     
     def save_map(self, save_path):
