@@ -33,3 +33,42 @@ class BlockMap():
     def save_map(self, save_path):
         with open(save_path, "w") as save_file:
             json.dump(self.map, save_file)
+    
+    def diff_map(self, target):
+        if self.block_size != target.block_size:
+            print "Cannot diff because block maps created with different block size."
+            return None
+        diff = {
+            "added": [],
+            "removed": [],
+            "updated": {}
+        }
+        diff["added"] = [i for i in self.map if i not in target.map]
+        diff["removed"] = [i for i in target.map if i not in self.map]
+        same = [i for i in self.map if i in target.map]
+        for i in same:
+            if self.map[i] == target.map[i]:
+                continue
+            length = max(len(self.map[i]), len(target.map[i]))
+            diff["updated"][i] = []
+            for x in range(length):
+                try:
+                    if self.map[i][x] == target.map[i][x]:
+                        diff["updated"][i].append({})
+                    else:
+                        diff["updated"][i].append({
+                            "target": target.map[i][x],
+                            "upgrade": self.map[i][x]
+                        })
+                except IndexError:
+                    if x < len(self.map[i]):
+                        diff["updated"][i].append({
+                            "target": "",
+                            "upgrade": self.map[i][x]
+                        })
+                    else:
+                        diff["updated"][i].append({
+                            "target": target.map[i][x],
+                            "upgrade": ""
+                        })
+        return diff
