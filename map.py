@@ -1,10 +1,11 @@
-import os, hashlib, json
+import os, hashlib, json, shutil
 
 class BlockMap():
     
     def __init__(self):
         self.root_path = None
         self.dir_path = None
+        self.diff_path = "diff"
         self.block_size = 4 * 1024
         self.map = {}
     
@@ -31,7 +32,7 @@ class BlockMap():
         for root, dirs, files in os.walk(os.path.join(self.root_path, self.dir_path)):
             for file_item in files:
                 file_real_path = os.path.join(root, file_item)
-                file_rel_path = file_real_path.lstrip(self.root_path)
+                file_rel_path = file_real_path.lstrip(self.root_path).lstrip("/")
                 self.map[file_rel_path] = self.get_blocks_hash(file_real_path, self.block_size)
         return self.map
     
@@ -77,3 +78,31 @@ class BlockMap():
                             "upgrade": ""
                         })
         return diff
+
+    def create_diff(self, target):
+        diff = self.diff_map(target)
+        if diff is None:
+            return False
+        for add_file in diff["added"]:
+            source = os.path.join(self.root_path, add_file)
+            dest = os.path.join(self.diff_path, add_file)
+            if not os.path.isdir(os.path.dirname(dest)):
+                os.makedirs(os.path.dirname(dest))
+            shutil.copyfile(source, dest)
+        for update_file in diff["updated"]:
+            upgrade_file = os.path.join(self.root_path, update_file)
+            upgrade_diff = os.path.join(self.diff_path, update_file)
+            if not os.path.isdir(os.path.dirname(upgrade_diff)):
+                os.makedirs(os.path.dirname(upgrade_diff))
+            length = len(diff["updated"][update_file])
+            with open(upgrade_file, "rb") as in_file:
+                for i in range(length):
+                    data = in_file.read(self.block_size)
+                    if "upgrade" in diff["updated"][update_file][i] and diff["updated"][update_file][i]["upgrade"] != "":
+                        diff_file = upgrade_diff + "-" + diff["updated"][update_file][i]["upgrade"]
+                        with open(diff_file, 'wb') as out_file:
+                            out_file.write(data)
+                    else:
+                        continue
+        return True
+      
