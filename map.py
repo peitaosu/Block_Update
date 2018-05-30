@@ -5,12 +5,19 @@ class BlockMap():
     def __init__(self):
         self.dir_path = None
         self.diff_path = "diff"
+        self.diff_file = "diff.json"
         self.block_size = 4 * 1024
         self.map = {}
     
     def set_dir_path(self, dir_path):
         self.dir_path = dir_path
     
+    def set_diff_path(self, diff_path):
+        self.diff_path = diff_path
+    
+    def set_diff_file(self, diff_file):
+        self.diff_file = diff_file
+
     def set_block_size(self, block_size):
         self.block_size = block_size
     
@@ -100,4 +107,7 @@ class BlockMap():
                             out_file.write(data)
                     else:
                         continue
+        diff_file_path = os.path.join(os.path.dirname(self.diff_path), self.diff_file)
+        with open(diff_file_path, "w") as save_file:
+            json.dump(diff, save_file, indent=4)
         return True
