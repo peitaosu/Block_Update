@@ -1,4 +1,4 @@
-import os, hashlib, json, shutil
+import os, sys, hashlib, json, shutil, optparse
 
 class BlockMap():
     
@@ -111,3 +111,37 @@ class BlockMap():
         with open(diff_file_path, "w") as save_file:
             json.dump(diff, save_file, indent=4)
         return True
+
+def get_options():
+    parser = optparse.OptionParser()
+    parser.add_option("-u", "--upgrade", dest="upgrade",
+                      help="upgrade folder")
+    parser.add_option("-t", "--target", dest="target",
+                      help="target folder")
+    parser.add_option("-b", "--block", dest="block", default=4*1024, type="int",
+                      help="block size")
+    parser.add_option("-d", "--diff", dest="diff", default="diff",
+                      help="diff output path")
+    (options, args) = parser.parse_args()
+    if not options.upgrade or not options.target:
+        parser.print_help()
+        sys.exit(-1)
+    return options
+
+if __name__ == "__main__":
+    opt = get_options()
+
+    upgrade = BlockMap()
+    target = BlockMap()
+    
+    upgrade.set_dir_path(opt.upgrade)
+    target.set_dir_path(opt.target)
+
+    upgrade.set_block_size(opt.block)
+    target.set_block_size(opt.block)
+
+    upgrade.get_blocks_map()
+    target.get_blocks_map()
+    
+    upgrade.set_diff_path(opt.diff)
+    upgrade.create_diff(target)
