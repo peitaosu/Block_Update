@@ -110,7 +110,43 @@ class BlockMap():
         with open(diff_file_path, "w") as save_file:
             json.dump(self.diff, save_file, indent=4)
         return True
-    
+
+    def apply_diff(self, target):
+        if self.diff is None:
+            diff_file_path = os.path.join(os.path.dirname(self.diff_path), self.diff_file)
+            with open(diff_file_path) as in_file:
+                self.diff = json.load(in_file)
+        for add_file in self.diff["added"]:
+            source = os.path.join(self.diff_path, add_file)
+            dest = os.path.join(target.dir_path, add_file)
+            if not os.path.isdir(os.path.dirname(dest)):
+                os.makedirs(os.path.dirname(dest))
+            shutil.copyfile(source, dest)
+        for rm_file in self.diff["removed"]:
+            dest = os.path.join(target.dir_path, rm_file)
+            os.remove(dest)
+        for update_file in self.diff["updated"]:
+            target_file = os.path.join(target.dir_path, update_file)
+            target_file_tmp = os.path.join(target.dir_path, update_file + ".tmp")
+            upgrade_diff = os.path.join(self.diff_path, update_file)
+            length = len(self.diff["updated"][update_file])
+            with open(target_file, "wb") as save_file:
+                with open(target_file, "rb") as in_file:
+                    for i in range(length):
+                        if self.diff["updated"][update_file][i] == {}:
+                            data = in_file.read(self.block_size)
+                            save_file.write(data)
+                        if "target" in self.diff["updated"][update_file][i] and self.diff["updated"][update_file][i]["target"] != "":
+                            data = in_file.read(self.block_size)
+                            if self.diff["updated"][update_file][i]["upgrade"] != "":
+                                diff_file = upgrade_diff + "-" + self.diff["updated"][update_file][i]["upgrade"]
+                                with open(diff_file, "rb") as diff_file:
+                                    diff_data = diff_file.read()
+                                    save_file.write(diff_data)
+                            else:
+                                continue
+        return True
+
 def get_options():
     parser = optparse.OptionParser()
     parser.add_option("-u", "--upgrade", dest="upgrade",
