@@ -102,7 +102,7 @@ class BlockMap():
                     data = in_file.read(self.block_size)
                     if "upgrade" in self.diff["updated"][update_file][i] and self.diff["updated"][update_file][i]["upgrade"] != "":
                         diff_file = upgrade_diff + "-" + self.diff["updated"][update_file][i]["upgrade"]
-                        with open(diff_file, 'wb') as out_file:
+                        with open(diff_file, "wb") as out_file:
                             out_file.write(data)
                     else:
                         continue
