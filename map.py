@@ -130,13 +130,13 @@ class BlockMap():
             target_file_tmp = os.path.join(target.dir_path, update_file + ".tmp")
             upgrade_diff = os.path.join(self.diff_path, update_file)
             length = len(self.diff["updated"][update_file])
-            with open(target_file, "wb") as save_file:
+            with open(target_file_tmp, "wb") as save_file:
                 with open(target_file, "rb") as in_file:
                     for i in range(length):
                         if self.diff["updated"][update_file][i] == {}:
                             data = in_file.read(self.block_size)
                             save_file.write(data)
-                        if "target" in self.diff["updated"][update_file][i] and self.diff["updated"][update_file][i]["target"] != "":
+                        if "upgrade" in self.diff["updated"][update_file][i] and self.diff["updated"][update_file][i]["upgrade"] != "":
                             data = in_file.read(self.block_size)
                             if self.diff["updated"][update_file][i]["upgrade"] != "":
                                 diff_file = upgrade_diff + "-" + self.diff["updated"][update_file][i]["upgrade"]
@@ -145,6 +145,8 @@ class BlockMap():
                                     save_file.write(diff_data)
                             else:
                                 continue
+            os.remove(target_file)
+            os.rename(target_file_tmp, target_file)
         return True
 
 def get_options():
