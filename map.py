@@ -85,6 +85,7 @@ class BlockMap():
     def create_diff(self):
         if self.diff is None:
             return False
+        self.diff["block"] = self.block_size
         for add_file in self.diff["added"]:
             source = os.path.join(self.dir_path, add_file)
             dest = os.path.join(self.diff_path, add_file)
@@ -116,6 +117,7 @@ class BlockMap():
             diff_file_path = os.path.join(os.path.dirname(self.diff_path), self.diff_file)
             with open(diff_file_path) as in_file:
                 self.diff = json.load(in_file)
+                self.block_size = self.diff["block"]
         for add_file in self.diff["added"]:
             source = os.path.join(self.diff_path, add_file)
             dest = os.path.join(target.dir_path, add_file)
@@ -174,10 +176,13 @@ if __name__ == "__main__":
     target = BlockMap()
     apply = BlockMap()
 
-    upgrade.set_block_size(opt.block)
-    upgrade.set_diff_path(opt.diff)
-    target.set_block_size(opt.block)
-    apply.set_block_size(opt.block)
+    if opt.block:
+        upgrade.set_block_size(opt.block)
+        target.set_block_size(opt.block)
+        apply.set_block_size(opt.block)
+
+    if opt.diff:
+        upgrade.set_diff_path(opt.diff)
 
     if opt.upgrade:
         upgrade.set_dir_path(opt.upgrade)
