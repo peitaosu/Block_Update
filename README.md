@@ -18,8 +18,12 @@ Options:
   -b BLOCK, --block=BLOCK
                         block size
   -d DIFF, --diff=DIFF  diff output path
+  -m MAP, --map=MAP     map output path
   -a APPLY, --apply=APPLY
                         apply diff to folder
+
+# create map
+> python map.py -u upgrade -m upgrade.json
 
 # create diff
 > python map.py -u upgrade -t target -b 1024 -d diff
