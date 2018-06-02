@@ -169,12 +169,14 @@ def get_options():
                       help="target folder")
     parser.add_option("-b", "--block", dest="block", default=4*1024, type="int",
                       help="block size")
-    parser.add_option("-d", "--diff", dest="diff", default="diff",
+    parser.add_option("-d", "--diff", dest="diff",
                       help="diff output path")
+    parser.add_option("-m", "--map", dest="map",
+                      help="map output path")
     parser.add_option("-a", "--apply", dest="apply",
                       help="apply diff to folder")
     (options, args) = parser.parse_args()
-    if not (options.apply or (options.upgrade and options.target)):
+    if not (options.apply or options.upgrade or options.target):
         parser.print_help()
         sys.exit(-1)
     return options
@@ -197,9 +199,13 @@ if __name__ == "__main__":
     if opt.upgrade:
         upgrade.set_dir_path(opt.upgrade)
         upgrade.get_blocks_map()
+        if opt.map:
+            upgrade.save_map(opt.map)
     if opt.target:
         target.set_dir_path(opt.target)
         target.get_blocks_map()
+        if opt.map:
+            target.save_map(opt.map)
     if opt.apply:
         apply.set_dir_path(opt.apply)
 
