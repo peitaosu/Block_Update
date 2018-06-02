@@ -40,10 +40,22 @@ class BlockMap():
                 self.map[file_rel_path] = self.get_blocks_hash(file_real_path, self.block_size)
         return self.map
     
-    def save_map(self, save_path):
-        with open(save_path, "w") as save_file:
-            json.dump(self.map, save_file)
+    def save_map(self, map_path):
+        with open(map_path, "w") as out_file:
+            json.dump(self.map, out_file, indent=4)
     
+    def read_map(self, map_path):
+        with open(map_path) as in_file:
+            self.map = json.load(in_file)
+
+    def save_diff(self, diff_path):
+        with open(diff_path, "w") as out_file:
+            json.dump(self.diff, out_file, indent=4)
+    
+    def read_diff(self, diff_path):
+        with open(diff_path) as in_file:
+            self.diff = json.load(in_file)
+        
     def diff_map(self, target):
         if self.block_size != target.block_size:
             print "Cannot diff because block maps created with different block size."
@@ -108,16 +120,14 @@ class BlockMap():
                     else:
                         continue
         diff_file_path = os.path.join(os.path.dirname(self.diff_path), self.diff_file)
-        with open(diff_file_path, "w") as save_file:
-            json.dump(self.diff, save_file, indent=4)
+        self.save_diff(diff_file_path)
         return True
 
     def apply_diff(self, target):
         if self.diff is None:
             diff_file_path = os.path.join(os.path.dirname(self.diff_path), self.diff_file)
-            with open(diff_file_path) as in_file:
-                self.diff = json.load(in_file)
-                self.block_size = self.diff["block"]
+            self.read_diff(diff_file_path)
+            self.block_size = self.diff["block"]
         for add_file in self.diff["added"]:
             source = os.path.join(self.diff_path, add_file)
             dest = os.path.join(target.dir_path, add_file)
@@ -132,19 +142,19 @@ class BlockMap():
             target_file_tmp = os.path.join(target.dir_path, update_file + ".tmp")
             upgrade_diff = os.path.join(self.diff_path, update_file)
             length = len(self.diff["updated"][update_file])
-            with open(target_file_tmp, "wb") as save_file:
+            with open(target_file_tmp, "wb") as out_file:
                 with open(target_file, "rb") as in_file:
                     for i in range(length):
                         if self.diff["updated"][update_file][i] == {}:
                             data = in_file.read(self.block_size)
-                            save_file.write(data)
+                            out_file.write(data)
                         if "upgrade" in self.diff["updated"][update_file][i] and self.diff["updated"][update_file][i]["upgrade"] != "":
                             data = in_file.read(self.block_size)
                             if self.diff["updated"][update_file][i]["upgrade"] != "":
                                 diff_file = upgrade_diff + "-" + self.diff["updated"][update_file][i]["upgrade"]
                                 with open(diff_file, "rb") as diff_file:
                                     diff_data = diff_file.read()
-                                    save_file.write(diff_data)
+                                    out_file.write(diff_data)
                             else:
                                 continue
             os.remove(target_file)
