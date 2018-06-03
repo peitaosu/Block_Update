@@ -148,15 +148,13 @@ class BlockMap():
                         if self.diff["updated"][update_file][i] == {}:
                             data = in_file.read(self.block_size)
                             out_file.write(data)
-                        if "upgrade" in self.diff["updated"][update_file][i] and self.diff["updated"][update_file][i]["upgrade"] != "":
+                            continue
+                        if self.diff["updated"][update_file][i]["upgrade"] != "":
                             data = in_file.read(self.block_size)
-                            if self.diff["updated"][update_file][i]["upgrade"] != "":
-                                diff_file = upgrade_diff + "-" + self.diff["updated"][update_file][i]["upgrade"]
-                                with open(diff_file, "rb") as diff_file:
-                                    diff_data = diff_file.read()
-                                    out_file.write(diff_data)
-                            else:
-                                continue
+                            diff_file = upgrade_diff + "-" + self.diff["updated"][update_file][i]["upgrade"]
+                            with open(diff_file, "rb") as diff_file:
+                                diff_data = diff_file.read()
+                                out_file.write(diff_data)
             os.remove(target_file)
             os.rename(target_file_tmp, target_file)
         return True
