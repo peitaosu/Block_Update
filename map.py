@@ -150,7 +150,11 @@ class BlockMap():
                             out_file.write(data)
                             continue
                         if self.diff["updated"][update_file][i]["upgrade"] != "":
-                            data = in_file.read(self.block_size)
+                            if self.diff["updated"][update_file][i]["target"] != "":
+                                data = in_file.read(self.block_size)
+                                if self.diff["updated"][update_file][i]["target"] != hashlib.md5(data).hexdigest():
+                                    print "Target block hash value not match."
+                                    return False
                             diff_file = upgrade_diff + "-" + self.diff["updated"][update_file][i]["upgrade"]
                             with open(diff_file, "rb") as diff_file:
                                 diff_data = diff_file.read()
