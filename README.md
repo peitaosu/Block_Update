@@ -3,6 +3,15 @@ Block Update
 
 File Update Mechanism based on Block Hash. 
 
+- A mapping file includes folder structure and hash values of file blocks.
+- A diff file includes:
+    - list of removed files
+    - list of added files
+    - list of files which have been updated and the hash value difference between upgrade file and target file
+- A diff folder includes added files with whole file and updated files with updated file fragments.
+
+Create diff outputs with upgrade folder and target folder and then apply the diff to the folder which you want to update.
+
 ## Map
 ```
 {
