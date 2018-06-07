@@ -22,7 +22,7 @@ class BlockMap():
     def set_block_size(self, block_size):
         self.block_size = block_size
     
-    def get_blocks_hash(self, file_path):
+    def _get_blocks_hash(self, file_path):
         f = open(file_path)
         hash_list = []
         while True:
@@ -37,7 +37,7 @@ class BlockMap():
             for file_item in files:
                 file_real_path = os.path.join(root, file_item)
                 file_rel_path = file_real_path.lstrip(self.dir_path).lstrip("/")
-                self.map[file_rel_path] = self.get_blocks_hash(file_real_path)
+                self.map[file_rel_path] = self._get_blocks_hash(file_real_path)
         return self.map
     
     def save_map(self, map_path):
