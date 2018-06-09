@@ -1,6 +1,8 @@
 Block Update
 ===========
 
+[![GitHub license](https://img.shields.io/github/license/peitaosu/Block_Update.svg)](https://github.com/peitaosu/Block_Update/blob/master/LICENSE)
+
 File Update Mechanism based on Block Hash. 
 
 - A mapping file includes folder structure and hash values of file blocks.
