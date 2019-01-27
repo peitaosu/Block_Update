@@ -7,6 +7,7 @@ class BlockMap():
         self.diff_path = "diff"
         self.diff_file = "diff.json"
         self.block_size = 4 * 1024
+        self.diff_algorithm = "md5"
         self.map = {}
         self.diff = None
     
@@ -35,7 +36,7 @@ class BlockMap():
             data = f.read(self.block_size)
             if not data:
                 break
-            hash_list.append(self._get_md5_hash(data))
+            hash_list.append(getattr(self, "_get_" + self.diff_algorithm + "_hash")(data))
         return hash_list
 
     def get_blocks_map(self):
@@ -65,6 +66,9 @@ class BlockMap():
     def diff_map(self, target):
         if self.block_size != target.block_size:
             print("Cannot diff because block maps created with different block size.")
+            return None
+        if self.diff_algorithm != target.diff_algorithm:
+            print("Cannot diff because block maps created with different diff algorithm.")
             return None
         self.diff = {
             "added": [],
@@ -104,6 +108,7 @@ class BlockMap():
         if self.diff is None:
             return False
         self.diff["block"] = self.block_size
+        self.diff["algorithm"] = self.diff_algorithm
         for add_file in self.diff["added"]:
             source = os.path.join(self.dir_path, add_file)
             dest = os.path.join(self.diff_path, add_file)
@@ -134,6 +139,7 @@ class BlockMap():
             diff_file_path = os.path.join(os.path.dirname(self.diff_path), self.diff_file)
             self.read_diff(diff_file_path)
             self.block_size = self.diff["block"]
+            self.diff_algorithm = self.diff["algorithm"]
         for add_file in self.diff["added"]:
             source = os.path.join(self.diff_path, add_file)
             dest = os.path.join(target.dir_path, add_file)
@@ -158,7 +164,7 @@ class BlockMap():
                         if self.diff["updated"][update_file][i]["upgrade"] != "":
                             if self.diff["updated"][update_file][i]["target"] != "":
                                 data = in_file.read(self.block_size)
-                                if self.diff["updated"][update_file][i]["target"] != self._get_md5_hash(data):
+                                if self.diff["updated"][update_file][i]["target"] != getattr(self, "_get_" + self.diff_algorithm + "_hash")(data):
                                     print("Target block hash value not match.")
                                     return False
                             diff_file = upgrade_diff + "-" + self.diff["updated"][update_file][i]["upgrade"]
