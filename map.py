@@ -22,6 +22,12 @@ class BlockMap():
     def set_block_size(self, block_size):
         self.block_size = block_size
     
+    def _get_md5_hash(self, data):
+        if (sys.version_info > (3, 0)):
+            return hashlib.md5(data.encode('utf-8')).hexdigest()
+        else:
+            return hashlib.md5(data).hexdigest()
+
     def _get_blocks_hash(self, file_path):
         f = open(file_path)
         hash_list = []
@@ -29,7 +35,7 @@ class BlockMap():
             data = f.read(self.block_size)
             if not data:
                 break
-            hash_list.append(hashlib.md5(data).hexdigest())
+            hash_list.append(self._get_md5_hash(data))
         return hash_list
 
     def get_blocks_map(self):
@@ -58,7 +64,7 @@ class BlockMap():
         
     def diff_map(self, target):
         if self.block_size != target.block_size:
-            print "Cannot diff because block maps created with different block size."
+            print("Cannot diff because block maps created with different block size.")
             return None
         self.diff = {
             "added": [],
@@ -152,8 +158,8 @@ class BlockMap():
                         if self.diff["updated"][update_file][i]["upgrade"] != "":
                             if self.diff["updated"][update_file][i]["target"] != "":
                                 data = in_file.read(self.block_size)
-                                if self.diff["updated"][update_file][i]["target"] != hashlib.md5(data).hexdigest():
-                                    print "Target block hash value not match."
+                                if self.diff["updated"][update_file][i]["target"] != self._get_md5_hash(data):
+                                    print("Target block hash value not match.")
                                     return False
                             diff_file = upgrade_diff + "-" + self.diff["updated"][update_file][i]["upgrade"]
                             with open(diff_file, "rb") as diff_file:
