@@ -23,11 +23,14 @@ class BlockMap():
     def set_block_size(self, block_size):
         self.block_size = block_size
     
+    def set_diff_algorithm(self, diff_algorithm):
+        if diff_algorithm not in dir(hashlib):
+            print("Only support algorithm which supported by hashlib.")
+            sys.exit(-1)
+        self.diff_algorithm = diff_algorithm
+    
     def _get_hash(self, data):
-        if (sys.version_info > (3, 0)):
-            return getattr(hashlib, self.diff_algorithm)(data.encode("utf-8")).hexdigest()
-        else:
-            return getattr(hashlib, self.diff_algorithm)(data).hexdigest()
+        return getattr(hashlib, self.diff_algorithm)(data).hexdigest()
 
     def _get_blocks_hash(self, file_path):
         f = open(file_path)
@@ -66,10 +69,10 @@ class BlockMap():
     def diff_map(self, target):
         if self.block_size != target.block_size:
             print("Cannot diff because block maps created with different block size.")
-            return None
+            sys.exit(-1)
         if self.diff_algorithm != target.diff_algorithm:
             print("Cannot diff because block maps created with different diff algorithm.")
-            return None
+            sys.exit(-1)
         self.diff = {
             "added": [],
             "removed": [],
@@ -183,6 +186,8 @@ def get_options():
                       help="target folder")
     parser.add_option("-b", "--block", dest="block", default=4*1024, type="int",
                       help="block size")
+    parser.add_option("--algorithm", dest="algorithm", default="md5",
+                      help="diff algorithm")                      
     parser.add_option("-d", "--diff", dest="diff",
                       help="diff output path")
     parser.add_option("-m", "--map", dest="map",
@@ -206,6 +211,11 @@ if __name__ == "__main__":
         upgrade.set_block_size(opt.block)
         target.set_block_size(opt.block)
         apply.set_block_size(opt.block)
+
+    if opt.algorithm:
+        upgrade.set_diff_algorithm(opt.algorithm)
+        target.set_diff_algorithm(opt.algorithm)
+        apply.set_diff_algorithm(opt.algorithm)
 
     if opt.diff:
         upgrade.set_diff_path(opt.diff)
