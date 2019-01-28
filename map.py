@@ -33,7 +33,7 @@ class BlockMap():
         return getattr(hashlib, self.diff_algorithm)(data).hexdigest()
 
     def _get_blocks_hash(self, file_path):
-        f = open(file_path)
+        f = open(file_path, "rb")
         hash_list = []
         while True:
             data = f.read(self.block_size)
