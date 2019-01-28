@@ -60,7 +60,8 @@ Create diff outputs with upgrade folder and target folder and then apply the dif
             }
         ]
     }, 
-    "block": 4096
+    "block": 4096,
+    "algorithm": "sha256"
 }
 ```
 
@@ -78,19 +79,21 @@ Options:
                         target folder
   -b BLOCK, --block=BLOCK
                         block size
+  --algorithm=ALGORITHM
+                        diff algorithm
   -d DIFF, --diff=DIFF  diff output path
   -m MAP, --map=MAP     map output path
   -a APPLY, --apply=APPLY
                         apply diff to folder
 
 # create map
-> python map.py -u upgrade -m upgrade.json
+> python map.py -u upgrade -m upgrade.json [-b 1024] [--algorithm sha256]
 
 # create diff
-> python map.py -u upgrade -t target -b 1024 -d diff
+> python map.py -u upgrade -t target -d diff [-b 1024] [--algorithm sha256]
 
 # apply diff
-> python map.py -a apply -b 1024 
+> python map.py -a apply [-b 1024] [--algorithm sha256]
 ```
 
 ## Usage (Module)
@@ -106,6 +109,12 @@ block = 1024
 upgrade.set_block_size(block)
 target.set_block_size(block)
 apply.set_block_size(block)
+
+# set diff algorithm
+algorithm = "sha256"
+upgrade.set_diff_algorithm(algorithm)
+target.set_diff_algorithm(algorithm)
+apply.set_diff_algorithm(algorithm)
 
 # set diff output path
 diff_path = "diff"
