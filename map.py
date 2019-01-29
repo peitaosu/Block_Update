@@ -12,27 +12,68 @@ class BlockMap():
         self.diff = None
     
     def set_dir_path(self, dir_path):
+        """set dir path
+
+        args:
+            dir_path (str)
+        """
         self.dir_path = dir_path
     
     def set_diff_path(self, diff_path):
+        """set diff path
+
+        args:
+            diff_path (str)
+        """
         self.diff_path = diff_path
     
     def set_diff_file(self, diff_file):
+        """set diff file
+
+        args:
+            diff file (str)
+        """
         self.diff_file = diff_file
 
     def set_block_size(self, block_size):
+        """set block size
+
+        args:
+            block_size (str)
+        """
         self.block_size = block_size
     
     def set_diff_algorithm(self, diff_algorithm):
+        """set diff algorithm
+
+        args:
+            diff_algorithm (str)
+        """
         if diff_algorithm not in dir(hashlib):
             print("Only support algorithm which supported by hashlib.")
             sys.exit(-1)
         self.diff_algorithm = diff_algorithm
     
     def _get_hash(self, data):
+        """get hash of data
+
+        args:
+            data (binary)
+        
+        returns:
+            hash (str)
+        """
         return getattr(hashlib, self.diff_algorithm)(data).hexdigest()
 
     def _get_blocks_hash(self, file_path):
+        """get hash of blocks
+
+        args:
+            file_path (str)
+        
+        returns:
+            hash_list (list)
+        """
         f = open(file_path, "rb")
         hash_list = []
         while True:
@@ -43,6 +84,11 @@ class BlockMap():
         return hash_list
 
     def get_blocks_map(self):
+        """get map of blocks
+
+        returns:
+            map (dict)
+        """
         for root, dirs, files in os.walk(self.dir_path):
             for file_item in files:
                 file_real_path = os.path.join(root, file_item)
@@ -51,22 +97,47 @@ class BlockMap():
         return self.map
     
     def save_map(self, map_path):
+        """save map to file
+
+        args:
+            map_path (str)
+        """
         with open(map_path, "w") as out_file:
             json.dump(self.map, out_file, indent=4)
     
     def read_map(self, map_path):
+        """read map from file
+
+        args:
+            map_path (str)
+        """
         with open(map_path) as in_file:
             self.map = json.load(in_file)
 
     def save_diff(self, diff_path):
+        """save diff to file
+
+        args:
+            diff_path (str)
+        """
         with open(diff_path, "w") as out_file:
             json.dump(self.diff, out_file, indent=4)
     
     def read_diff(self, diff_path):
+        """read diff from file
+
+        args:
+            diff_path (str)
+        """
         with open(diff_path) as in_file:
             self.diff = json.load(in_file)
         
     def diff_map(self, target):
+        """diff with target
+
+        args:
+            target (BlockMap)
+        """
         if self.block_size != target.block_size:
             print("Cannot diff because block maps created with different block size.")
             sys.exit(-1)
@@ -108,6 +179,8 @@ class BlockMap():
                         })
 
     def create_diff(self):
+        """create diff
+        """
         if self.diff is None:
             return False
         self.diff["block"] = self.block_size
@@ -138,6 +211,11 @@ class BlockMap():
         return True
 
     def apply_diff(self, target):
+        """apply diff
+
+        args:
+            target (BlockMap)
+        """
         if self.diff is None:
             diff_file_path = os.path.join(os.path.dirname(self.diff_path), self.diff_file)
             self.read_diff(diff_file_path)
